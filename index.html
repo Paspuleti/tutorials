@@ -26,6 +26,47 @@
     //Defined variables for collision detection
     var ballRadius = 10;
 
+    //Defined variables for paddle
+    var paddleHeight = 10;
+    var paddleWidth = 75;
+    var paddleX = (canvas.width-paddleWidth)/2
+
+    //Defined variables for paddle control
+    var rightPressed = false;
+    var leftPressed = false;
+
+    //Defined variables for bricks
+    var brickRowCount = 3;
+    var brickColumnCount = 5;
+    var brickWidth = 75;
+    var brickHeight = 20;
+    var brickPadding = 10;
+    var brickOffsetTop = 30;
+    var brickOffsetLeft = 30;
+
+    //checks to see if the keys are pressed
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+
+    //logic regarding what to do if the key is pressed (stores the information as boolean)
+    function keyDownHandler(e) {
+        if(e.key == "Right" || e.key == "ArrowRight") {
+            rightPressed = true;
+        }
+        else if(e.key == "Left" || e.key == "ArrowLeft") {
+            leftPressed = true;
+        }
+    }
+    function keyUpHandler(e) {
+        if(e.key == "Right" || e.key == "ArrowRight") {
+            rightPressed = false;
+        }
+        else if(e.key == "Left" || e.key == "ArrowLeft") {
+            leftPressed = false;
+        }
+    }
+
+    //Function used to draw the ball
     function drawBall() {
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, Math.PI*2);
@@ -34,21 +75,58 @@
         ctx.closePath();
     }
     
+    //Function to draw the paddle
+    function drawPaddle(){
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    //Function to draw out everything
     function draw() {
+
+        //clears the screen so we can draw the next frame
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         drawBall();
+        drawPaddle();
+
+        //moves the location of the ball
         x += dx;
         y += dy;
 
+        //detects the collision and changes the ball direction
         if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
             dx = -dx;
         }
-        if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+        if(y + dy < ballRadius) {
             dy = -dy;
+        }
+        //if the ball collides with the bottom of canvas, trigger "game over"
+        else if (y + dy > canvas.height-ballRadius){
+            if(x > paddleX && x < paddleX + paddleWidth){
+                dy = -dy;
+            }
+            else{
+            alert("Game Over");
+            document.location.reload();
+            clearInterval(interval); //needed for chrome to end game
+            }
+        }
+
+        //tells the paddle where to move when key is pressed
+        if(rightPressed && paddleX < canvas.width - paddleWidth) {
+            paddleX += 7;
+        }
+        else if(leftPressed && paddleX > 0) {
+            paddleX -= 7;
         }
     }
     
-    setInterval(draw, 10);
+    //define variable to draw everything again every 10 milliseconds
+    var interval = setInterval(draw, 10);
 
     </script>
 
